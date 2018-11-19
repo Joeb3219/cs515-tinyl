@@ -277,6 +277,33 @@ lhs	: ID			{
 
 	|  ID '[' exp ']' 	{
 
+							$$.targetRegister = NextRegister();
+
+							int arrayOffset;
+							SymTabEntry *varEntry = lookup($1.str);
+
+							if(varEntry == NULL){
+								printf("Unknown variable %s\n.", $1.str);
+								return -1;
+							}else if(varEntry->quantity != QUANTITY_ARRAY){
+								printf("Variable isn't an array: %s\n", $1.str);
+								return -1;
+							}
+
+							arrayOffset = varEntry->offset;
+
+
+							int tempReg = NextRegister(); // Used to hold the constant 4
+							int indexOffsetReg = NextRegister(); // Holds exp * 4
+							int overallOffset = NextRegister(); // Holds indexOffsetReg + arrayOffset.
+
+							sprintf(CommentBuffer, "Loading array %s w/ offset %d, at position r%d (*4)\n", $1.str, arrayOffset, $3.targetRegister);
+							emitComment(CommentBuffer);
+
+							emit(NOLABEL, LOADI, 4, tempReg, EMPTY); // 4
+							emit(NOLABEL, MULT, tempReg, $3.targetRegister, indexOffsetReg); // 4 * exp
+							emit(NOLABEL, ADDI, indexOffsetReg, arrayOffset, overallOffset); // 4 * expr + offset
+							emit(NOLABEL, ADD, 0, overallOffset, $$.targetRegister); // r0 + 4 * expr + offset
 						}
 								;
 
@@ -354,7 +381,38 @@ exp	: exp '+' exp		{
 							emit(NOLABEL, LOADAI, 0, offset, $$.targetRegister);
 						}
 
-		| ID '[' exp ']'	{   }
+		| ID '[' exp ']'	{  
+
+								$$.targetRegister = NextRegister();
+
+								int arrayOffset;
+								SymTabEntry *varEntry = lookup($1.str);
+
+								if(varEntry == NULL){
+									printf("Unknown variable %s\n.", $1.str);
+									return -1;
+								}else if(varEntry->quantity != QUANTITY_ARRAY){
+									printf("Variable isn't an array: %s\n", $1.str);
+									return -1;
+								}
+
+								arrayOffset = varEntry->offset;
+
+
+								int tempReg = NextRegister(); // Used to hold the constant 4
+								int indexOffsetReg = NextRegister(); // Holds exp * 4
+								int overallOffset = NextRegister(); // Holds indexOffsetReg + arrayOffset.
+
+								sprintf(CommentBuffer, "Loading array %s w/ offset %d, at position r%d (*4)\n", $1.str, arrayOffset, $3.targetRegister);
+								emitComment(CommentBuffer);
+
+								emit(NOLABEL, LOADI, 4, tempReg, EMPTY); // 4
+								emit(NOLABEL, MULT, tempReg, $3.targetRegister, indexOffsetReg); // 4 * exp
+								emit(NOLABEL, ADDI, indexOffsetReg, arrayOffset, overallOffset); // 4 * expr + offset
+								emit(NOLABEL, LOADAO, 0, overallOffset, $$.targetRegister); // r0 + 4 * expr + offset
+
+
+							}
  
 
 

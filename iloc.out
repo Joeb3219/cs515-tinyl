@@ -1,76 +1,64 @@
 	// Assign STATIC_AREA_ADDRESS to register "r0"
  	 loadI 1024 	=> r0 
- 	 loadI 0 	=> r1 
- 	 loadI 1 	=> r2 
- 	 store r2 	=> r28235024 
+	// Compute address of variable "i" at offset 8 in register 2
+ 	 loadI 8 	=> r1 
+ 	 add r0, r1 	=> r2 
  	 loadI 0 	=> r3 
- 	 loadI 1 	=> r4 
- 	 store r4 	=> r28235120 
- 	 loadI 0 	=> r5 
-	// Code for "PRINT" from offset -4
- 	 storeAI r28235152 	=> r0, -4 
- 	 outputAI r0, -4
- 	 loadI 0 	=> r6 
-	// Code for "PRINT" from offset -4
- 	 storeAI r28235184 	=> r0, -4 
- 	 outputAI r0, -4
-	// Loading variable i (offset 0) into reg 8
- 	 loadI 0 	=> r7 
+ 	 store r3 	=> r2 
+	// Compute address of variable "a" at offset 0 in register 5
+ 	 loadI 0 	=> r4 
+ 	 add r0, r4 	=> r5 
+ 	 loadI 1 	=> r6 
+ 	 store r6 	=> r5 
+	// Compute address of variable "b" at offset 4 in register 8
+ 	 loadI 4 	=> r7 
  	 add r0, r7 	=> r8 
- 	 loadI 1 	=> r9 
+ 	 loadI 10 	=> r9 
  	 store r9 	=> r8 
-	// FOR LOOP labels: 0 1 2
-
-	// Loading initial value 0 into variable w/ offset 0
-
- 	 loadI 9 	=> r10 
- 	 loadI 0 	=> r11 
- 	 storeAI r11 	=> r0, 0 
-	// Precondition
-
-L0:	 loadAI r0, 0 	=> r12 
- 	 cmp_LE r12, r10 	=> r13
+	// Initialize ind. variable "i" at offset 8 with lower bound value 0
+ 	 loadI 8 	=> r10 
+ 	 add r0, r10 	=> r11 
+ 	 loadI 0 	=> r14 
+ 	 loadI 100 	=> r15 
+ 	 store r14 	=> r11 
+	// Generate control code for "FOR" 
+L0:	 loadAI r0, 8 	=> r12 
+ 	 cmp_LE r12, r15 	=> r13
  	 cbr r13 	=> L1, L2
-	// FOR LOOP @ 0 body: 1
-
 L1:	 nop 
-	// Loading variable i (offset 0) from rhs into reg 14
- 	 loadAI r0, 0 	=> r14 
-	// Loading variable i (offset 0) from rhs into reg 15
- 	 loadAI r0, 0 	=> r15 
- 	 loadI 1 	=> r16 
- 	 sub r15, r16 	=> r17 
-	// Loading variable i (offset 0) from rhs into reg 18
+	// Compute address of variable "a" at offset 0 in register 17
+ 	 loadI 0 	=> r16 
+ 	 add r0, r16 	=> r17 
+	// Load RHS value of variable "a" at offset 0
  	 loadAI r0, 0 	=> r18 
- 	 loadI 1 	=> r19 
- 	 sub r18, r19 	=> r20 
- 	 add r28235568, r28235632 	=> r21 
- 	 store r21 	=> r28235504 
-	// Loading variable i (offset 0) from rhs into reg 22
- 	 loadAI r0, 0 	=> r22 
-	// Loading variable i (offset 0) from rhs into reg 23
- 	 loadAI r0, 0 	=> r23 
+ 	 loadI 2 	=> r19 
+ 	 add r18, r19 	=> r20 
+ 	 store r20 	=> r17 
+	// Compute address of variable "b" at offset 4 in register 22
+ 	 loadI 4 	=> r21 
+ 	 add r0, r21 	=> r22 
+	// Load RHS value of variable "b" at offset 4
+ 	 loadAI r0, 4 	=> r23 
  	 loadI 1 	=> r24 
- 	 sub r23, r24 	=> r25 
- 	 loadI 1 	=> r26 
- 	 add r28235760, r26 	=> r27 
- 	 store r27 	=> r28235696 
-	// Loading variable i (offset 0) from rhs into reg 28
- 	 loadAI r0, 0 	=> r28 
+ 	 add r23, r24 	=> r25 
+ 	 store r25 	=> r22 
+ 	 loadAI r0, 8 	=> r26 
+ 	 addI r26, 1 	=> r27 
+ 	 storeAI r27 	=> r0, 8 
+ 	 br L0
+L2:	 nop 
+	// Load RHS value of variable "i" at offset 8
+ 	 loadAI r0, 8 	=> r28 
 	// Code for "PRINT" from offset -4
- 	 storeAI r28235824 	=> r0, -4 
+ 	 storeAI r28 	=> r0, -4 
  	 outputAI r0, -4
-	// Loading variable i (offset 0) from rhs into reg 29
+	// Load RHS value of variable "a" at offset 0
  	 loadAI r0, 0 	=> r29 
 	// Code for "PRINT" from offset -4
- 	 storeAI r28235888 	=> r0, -4 
+ 	 storeAI r29 	=> r0, -4 
  	 outputAI r0, -4
-	// Looping back to top of loop @ 0
-
- 	 loadAI r0, 0 	=> r30 
- 	 addI r30, 1 	=> r30 
- 	 storeAI r30 	=> r0, 0 
- 	 br L0
-	// We're done otherwise, so we'll drop our failure condiiton.
-
-L2:	 nop 
+	// Load RHS value of variable "b" at offset 4
+ 	 loadAI r0, 4 	=> r30 
+	// Code for "PRINT" from offset -4
+ 	 storeAI r30 	=> r0, -4 
+ 	 outputAI r0, -4
