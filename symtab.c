@@ -56,9 +56,8 @@ lookup(char *name) {
   return NULL;
 }
 
-
 void 
-insert(char *name, int offset) {
+insert(char *name, Type type, Quantity quantity, int offset) {
   int currentIndex;
   int visitedSlots = 0;
 
@@ -78,6 +77,28 @@ insert(char *name, int offset) {
   HashTable[currentIndex]->name = (char *) malloc (strlen(name)+1);
   strcpy(HashTable[currentIndex]->name, name);
   HashTable[currentIndex]->offset = offset; /* in bytes */
+  HashTable[currentIndex]->quantity = quantity;
+  HashTable[currentIndex]->type = type;
+}
+
+char* typeToText(Type type){
+  switch(type){
+    case TYPE_INT:
+      return "INTEGER";
+    default:
+      return "???";
+  }
+}
+
+char* quantityToText(Quantity quantity){
+  switch(quantity){
+    case QUANTITY_SCALAR:
+      return "SCALAR";
+    case QUANTITY_ARRAY:
+      return "ARRAY";
+    default:
+      return "???";
+  }
 }
 
 void 
@@ -87,8 +108,9 @@ PrintSymbolTable() {
   printf("\n --- Symbol Table ---------------\n\n");
   for (i=0; i < HASH_TABLE_SIZE; i++) {
     if (HashTable[i] != NULL) {
-      printf("\t \"%s\" of type integer with offset %d\n", 
-		HashTable[i]->name, HashTable[i]->offset); 
+      printf("\t %s \"%s\" of type %s with offset %d\n", 
+    quantityToText(HashTable[i]->quantity),
+		HashTable[i]->name, typeToText(HashTable[i]->type), HashTable[i]->offset); 
     }
   }
   printf("\n --------------------------------\n\n");
