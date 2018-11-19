@@ -30,10 +30,13 @@ char *CommentBuffer;
 %token <token> ID ICONST 
 
 %type <targetReg> exp 
+%type <targetReg> condexp 
 %type <targetReg> lhs 
 %type <varType> type
 %type <variableList> idlist
 %type <jumpControl> FOR
+%type <jumpControl> IF
+%type <jumpControl> ifhead
 %type <cntrlExpr> ctrlexp
 
 %start program
@@ -123,12 +126,46 @@ cmpdstmt: BEG stmtlist END { }
 	;
 
 ifstmt :  ifhead 
-		  THEN stmt 
-	  ELSE 
+		  THEN 	{
+
+		  			emit($1.success, NOP, EMPTY, EMPTY, EMPTY);
+		  			emitComment("This is the \"True\" Branch.");
+
+		  		}
+
+		  	stmt 
+
+		  		{
+
+		  			emit(NOLABEL, BR, $1.postcondition, EMPTY, EMPTY);
+
+		  		}
+
+	  ELSE 		{
+
+
+					emit($1.failure, NOP, EMPTY, EMPTY, EMPTY);
+		  			emitComment("This is the \"False\" Branch.");
+
+	  			}
 		  stmt 
+
+		  		{
+
+		  			emit($1.postcondition, NOP, EMPTY, EMPTY, EMPTY);
+
+		  		}
 	;
 
-ifhead : IF condexp {  }
+ifhead : IF condexp 
+				
+				{ 
+					$1.success = $$.success = NextLabel();
+					$1.failure = $$.failure = NextLabel();
+					$1.postcondition = $$.postcondition = NextLabel();
+					emit(NOLABEL, CBR, $2.targetRegister, $$.success, $$.failure);
+
+				}
 		;
 
 fstmt	: FOR 	{
@@ -350,13 +387,33 @@ ctrlexp	: ID ASG ICONST ',' ICONST 	{
 		;
 
 
-condexp	: exp NEQ exp		{  } 
+condexp	: exp NEQ exp		{ 
 
-		| exp EQ exp		{  } 
+								$$.targetRegister = NextRegister();
+								emit(NOLABEL, CMPNE, $1.targetRegister, $3.targetRegister, $$.targetRegister);
 
-		| exp LT exp		{  }
+							} 
 
-		| exp LEQ exp		{  }
+		| exp EQ exp		{ 
+
+								$$.targetRegister = NextRegister();
+								emit(NOLABEL, CMPEQ, $1.targetRegister, $3.targetRegister, $$.targetRegister);
+
+							} 
+
+		| exp LT exp		{ 
+
+								$$.targetRegister = NextRegister();
+								emit(NOLABEL, CMPLT, $1.targetRegister, $3.targetRegister, $$.targetRegister);
+
+							} 
+
+		| exp LEQ exp		{ 
+
+								$$.targetRegister = NextRegister();
+								emit(NOLABEL, CMPLE, $1.targetRegister, $3.targetRegister, $$.targetRegister);
+
+							} 
 
 	| error { yyerror("***Error: illegal conditional expression\n");}  
 		;

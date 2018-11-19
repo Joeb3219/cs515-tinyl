@@ -21,6 +21,7 @@ typedef struct{
 	int precondition;
 	int success;
 	int failure;
+	int postcondition;
 	int successRegister;
 } JumpControl;
 
